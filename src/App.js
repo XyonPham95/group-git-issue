@@ -1,6 +1,16 @@
 import React, {useState,useEffect} from 'react';
-// import logo from './logo.svg';
 import './App.css';
+import "bootstrap/dist/css/bootstrap.min.css";
+import {
+  Navbar,
+  Nav,
+  NavDropdown,
+  Form,
+  FormControl
+} from "react-bootstrap";
+import ReactModal from 'react-modal';
+import Pagination from "react-js-pagination";
+
 
 const clientId = process.env.REACT_APP_CLIENT_ID;
 
