@@ -5,6 +5,7 @@ import NavBar from './components/NavBar'
 import RenderSearchResults from './components/RenderSearchResults'
 import RenderRepo from './components/RenderRepo'
 import RenderIssues from './components/RenderIssues'
+import webdesign from './webdesign.png'
 
 
 const clientId = process.env.REACT_APP_CLIENT_ID;
@@ -134,7 +135,7 @@ if (!token) {
 }
 
 const viewController = () => {
-  if (view === 'landing') return (<div>landing</div>)
+  if (view === 'landing') return (<div className="img-home"><img src={webdesign} alt="star" style={{width: '50%'}}/></div>)
   else if (view === 'search') return (<div><RenderSearchResults reps={reps} fetchRepo={fetchRepo} fetchIssues={fetchIssues} issues={issues} page={page} handleSearchPageChange={handleSearchPageChange} searchTotalCount={searchTotalCount}/></div>)
   // else if (view === 'repo') return (<div><RenderRepo setView={setView} repo={repo} fetchIssues={fetchIssues} issues={issues}/> </div>)
   else if (view === 'issues') return (<RenderIssues issues={issues} repo={repo} searchTerm={searchTerm} page={page} handlePageChange={handlePageChange} totalCount={totalCount} repo={repo}/>)

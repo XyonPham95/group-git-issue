@@ -44,3 +44,8 @@
 #grad {
   background-image: linear-gradient(#E2F6F7, white);
 }
+
+.img-home {
+  text-align: center;
+  margin-top: 5%;
+}
