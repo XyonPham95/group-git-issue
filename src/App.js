@@ -18,11 +18,14 @@ function App() {
   const [reps, setReps] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const [view, setView] = useState('landing')
-  const [repo, setRepo] = useState(null)
-  const [singleIssue, setSingleIssue] = useState({})
-  const [issueNumber, setIssueNumber] = useState(0)
-  const [commentNumber, setCommentNumber] = useState(0)
-  const [comments, setComment] = useState({})
+  const [repo, setRepo] = useState([])
+  const [page, setPage] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
+  const [searchTotalCount, setSearchTotalCount] = useState(0)
+  const [fullName, setFullName] = useState('')
+  const [singleIssue, setSingleIssue] = useState ([])
+
+
 
   useEffect(() => { //if we already have token in our local storage, then just use that one, if not then call the server
     const existingToken = localStorage.getItem('token');
@@ -42,7 +45,8 @@ function App() {
   }, [])
 
   const fetchSearch = async (search) => {
-    const res = await fetch(`https://api.github.com/search/repositories?q=${search}`, {
+    
+    const res = await fetch(`https://api.github.com/search/repositories?q=${search}&page=1`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/vnd.github.mercy-preview+json'
@@ -50,10 +54,12 @@ function App() {
       }
     })
     const data = await res.json();
+    setSearchTotalCount(search);
     setReps(reps.concat(data.items))
-  setView("search")
-  console.log(data)
-}
+    setSearchTotalCount(data.total_count);
+    setView("search")
+    console.log(data)
+  }
 
 const fetchRepo = async (fullname) => {
   const res = await fetch(`https://api.github.com/repos/${fullname}`, {
@@ -69,7 +75,6 @@ const fetchRepo = async (fullname) => {
 }
 
 const fetchIssues = async (fullname) => {
-  fetchRepo(fullname);
   const res = await fetch(`https://api.github.com/repos/${fullname}/issues`, {
     method: "GET",
     headers: {
@@ -77,14 +82,18 @@ const fetchIssues = async (fullname) => {
     }
 
   })
+  console.log('result',res)
+  setFullName(fullname);
   const data = await res.json();
   setIssues(data)
   setView('issues')
+  fetchRepo(fullname);
+ 
 }
 
-const fetchSingleIssue = async (fullname, issueNumber) => {
-  setIssueNumber(issueNumber);
-  const res = await fetch(`https://api.github.com/repos/${fullname}/issues/${issueNumber}`, {
+const handlePageChange = async (page) => {
+  setPage(page)
+  const res = await fetch(`https://api.github.com/repos/${fullName}/issues?page=${page}`, {
     method: "GET",
     headers: {
       'Content-Type': 'application/vnd.github.mercy-preview+json',
@@ -97,29 +106,30 @@ const fetchSingleIssue = async (fullname, issueNumber) => {
   setView('singleIssue');
 }
 
-const fetchComments = async (fullname, issueNumber) => {
-  setCommentNumber(commentNumber);
-const res = await fetch (`https://api.github.com/repos/${fullname}/issues/${issueNumber}/comments`,{
-  method: "GET",
-  headers: { 
-    'Content-Type': 'application/vnd.github.mercy-preview+json',
-    'Accept':  'application/vnd.github.squirrel-girl-preview+json'
-}
-})
+const handleSearchPageChange = async (page) => {
+  setPage(page)
+  const res = await fetch(`https://api.github.com/search/repositories?q=${searchTerm}&page=${page}`, {
+    method: "GET",
+    headers: {
+      'Content-Type': 'application/vnd.github.mercy-preview+json'
+    }
+
+  })
+  console.log(res)
   const data = await res.json();
-  console.log('comments',data);
-  setComment(data);
-  setView('comments');
+  console.log(data)
+  setReps(data.items)
+  setView("search")
 }
+
 
 
 
 const viewController = () => {
   if (view === 'landing') return (<div>landing</div>)
-  else if (view === 'search') return (<div><RenderSearchResults reps={reps} fetchRepo={fetchRepo} fetchIssues={fetchIssues} /></div>)
-  else if (view === 'repo') return (<RenderRepo setView={setView} repo={repo} fetchIssues={fetchIssues} />)
-  else if (view === 'issues') return (<RenderIssues repo={repo} issues={issues} fetchSingleIssue={fetchSingleIssue}/>)
-  else if (view === 'comments') return (<RenderComments comments={comments} fetchIssues={fetchIssues} fetchSingleIssue={fetchSingleIssue}/>)
+  else if (view === 'search') return (<div><RenderSearchResults reps={reps} fetchRepo={fetchRepo} fetchIssues={fetchIssues} issues={issues} page={page} handleSearchPageChange={handleSearchPageChange} searchTotalCount={searchTotalCount}/></div>)
+  // else if (view === 'repo') return (<div><RenderRepo setView={setView} repo={repo} fetchIssues={fetchIssues} issues={issues}/> </div>)
+  else if (view === 'issues') return (<RenderIssues issues={issues} repo={repo} searchTerm={searchTerm} page={page} handlePageChange={handlePageChange} totalCount={totalCount} repo={repo}/>)
 }
 
 return (

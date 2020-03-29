@@ -44,7 +44,7 @@ export default function RenderIssues(props) {
                     <p>If you have a bug or an idea, read the contributing guidelines before opening an issue.<br></br>
                     If you're ready to tackle some open issues, we've collected some good first issues for you.</p></Card.Body>
             </Card>
-            <div onClick={()=> props.fetchComments(props.comments.id)}><h5>View Issues From {props.repo.full_name}</h5></div>
+            <h5>View Issues From {props.repo.full_name}</h5>
             <h6>{props.repo.description}</h6>
             {renderIssues()}
         </div>
