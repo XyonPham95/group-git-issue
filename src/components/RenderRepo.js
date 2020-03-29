@@ -1,7 +1,7 @@
 import React from 'react'
 
 export default function RenderRepo(props) {
-    return (
+    return (        
         <div onClick={()=> props.fetchIssues(props.repo.full_name)}>
             {props.repo && props.repo.description}
         </div>

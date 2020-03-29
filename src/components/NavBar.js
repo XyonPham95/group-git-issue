@@ -20,7 +20,7 @@ export default function NavBar(props) {
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Dropdown
-        </a>
+                        </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <a class="dropdown-item" href="#">Action</a>
                             <a class="dropdown-item" href="#">Another action</a>
@@ -36,7 +36,7 @@ export default function NavBar(props) {
                     e.preventDefault();
                     props.fetchSearch(props.searchTerm)
                 }}>
-                    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" onChange={e=>props.setSearchTerm(e.target.value)} value={props.searchTerm}/>
+                    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" onChange={e => props.setSearchTerm(e.target.value)} value={props.searchTerm} />
                     <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
                 </form>
             </div>

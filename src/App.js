@@ -52,57 +52,62 @@ function App() {
     })
     const data = await res.json();
     setReps(reps.concat(data.items))
-  setView("search")
-  console.log(data)
-}
+    setView("search")
+    console.log(data)
+  }
 
-const fetchRepo = async (fullname) => {
-  const res = await fetch(`https://api.github.com/repos/${fullname}`, {
-    method: "GET",
-    headers: {
-      'Content-Type': 'application/vnd.github.mercy-preview+json'
-    }
+  const fetchRepo = async (fullname) => {
+    const res = await fetch(`https://api.github.com/repos/${fullname}`, {
+      method: "GET",
+      headers: {
+        'Content-Type': 'application/vnd.github.mercy-preview+json'
+      }
 
-  })
-  const data = await res.json();
-  setRepo(data)
-  setView('repo')
-}
+    })
+    const data = await res.json();
+    setRepo(data)
+    setView('repo')
+  }
 
-const fetchIssues = async (fullname) => {
-  const res = await fetch(`https://api.github.com/repos/${fullname}/issues`, {
-    method: "GET",
-    headers: {
-      'Content-Type': 'application/vnd.github.mercy-preview+json'
-    }
+  const fetchIssues = async (fullname) => {
+    const res = await fetch(`https://api.github.com/repos/${fullname}/issues`, {
+      method: "GET",
+      headers: {
+        'Content-Type': 'application/vnd.github.mercy-preview+json'
+      }
 
-  })
-  const data = await res.json();
-  setIssues(data)
-  setView('issues')
-}
+    })
+    const data = await res.json();
+    setIssues(data)
+    setView('issues')
+  }
 
-if (!token) {
+  
+
+  if (!token) {
+    return (
+      <div>
+        there is no token
+      </div>
+    )
+  }
+
+
+
+  const viewController = () => {
+    if (view === 'landing') return (<div></div>)
+    else if (view === 'search') return (<div><RenderSearchResults reps={reps} fetchRepo={fetchRepo} /></div>)
+    else if (view === 'repo') return (<RenderRepo setView={setView} repo={repo} fetchIssues={fetchIssues} />)
+    else if (view === 'issues') return (<RenderIssues issues={issues} />)
+  }
+
   return (
     <div>
-      there is no token
-      </div>
+      <NavBar fetchSearch={fetchSearch} setSearchTerm={setSearchTerm} searchTerm={searchTerm} />
+
+      {viewController()}
+    </div>
   )
 }
-
-const viewController = () => {
-  if (view === 'landing') return (<div>landing</div>)
-  else if (view === 'search') return (<div><RenderSearchResults reps={reps} fetchRepo={fetchRepo} /></div>)
-  else if (view === 'repo') return (<RenderRepo setView={setView} repo={repo} fetchIssues={fetchIssues} />)
-  else if (view === 'issues') return (<RenderIssues issues={issues} />)
-}
-
-return (
-  <div>
-    <NavBar fetchSearch={fetchSearch} setSearchTerm={setSearchTerm} searchTerm={searchTerm} />
-    {token}
-    {viewController()}
-  </div>
-)}
 
 export default App;
