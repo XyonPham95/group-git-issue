@@ -81,11 +81,13 @@ const fetchIssues = async (fullname) => {
   setView('issues')
 }
 
+
+
 const viewController = () => {
   if (view === 'landing') return (<div>landing</div>)
   else if (view === 'search') return (<div><RenderSearchResults reps={reps} fetchRepo={fetchRepo} /></div>)
   else if (view === 'repo') return (<RenderRepo setView={setView} repo={repo} fetchIssues={fetchIssues} />)
-  else if (view === 'issues') return (<RenderIssues issues={issues} />)
+  else if (view === 'issues') return (<RenderIssues issues={issues}/>)
 }
 
 return (
