@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Card, Col, Row, } from 'react-bootstrap/';
@@ -80,14 +79,6 @@ const fetchIssues = async (fullname) => {
   const data = await res.json();
   setIssues(data)
   setView('issues')
-}
-
-if (!token) {
-  return (
-    <div>
-      there is no token
-      </div>
-  )
 }
 
 const viewController = () => {
