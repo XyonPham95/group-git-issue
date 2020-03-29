@@ -22,7 +22,7 @@ function App() {
   const [singleIssue, setSingleIssue] = useState({})
   const [issueNumber, setIssueNumber] = useState(0)
   const [commentNumber, setCommentNumber] = useState(0)
-  const [comments, setComments] = useState({})
+  const [comments, setComment] = useState({})
 
   useEffect(() => { //if we already have token in our local storage, then just use that one, if not then call the server
     const existingToken = localStorage.getItem('token');
@@ -99,7 +99,7 @@ const fetchSingleIssue = async (fullname, issueNumber) => {
 
 const fetchComments = async (fullname, issueNumber) => {
   setCommentNumber(commentNumber);
-const res = await fetch (`https://api.github.com/repos/${fullname}/issues/${issueNumber}/reactions`,{
+const res = await fetch (`https://api.github.com/repos/${fullname}/issues/${issueNumber}/comments`,{
   method: "GET",
   headers: { 
     'Content-Type': 'application/vnd.github.mercy-preview+json',
@@ -108,6 +108,7 @@ const res = await fetch (`https://api.github.com/repos/${fullname}/issues/${issu
 })
   const data = await res.json();
   console.log('comments',data);
+  setComment(data);
   setView('comments');
 }
 
@@ -118,7 +119,7 @@ const viewController = () => {
   else if (view === 'search') return (<div><RenderSearchResults reps={reps} fetchRepo={fetchRepo} fetchIssues={fetchIssues} /></div>)
   else if (view === 'repo') return (<RenderRepo setView={setView} repo={repo} fetchIssues={fetchIssues} />)
   else if (view === 'issues') return (<RenderIssues repo={repo} issues={issues} fetchSingleIssue={fetchSingleIssue}/>)
-  else if (view === 'comments') return (<RenderComments comments={comments}/>)
+  else if (view === 'comments') return (<RenderComments comments={comments} fetchIssues={fetchIssues} fetchSingleIssue={fetchSingleIssue}/>)
 }
 
 return (

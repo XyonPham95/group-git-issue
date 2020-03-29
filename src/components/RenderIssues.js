@@ -14,7 +14,7 @@ export default function RenderIssues(props) {
             <Card className="border-left-0 !important, border-right-0 pt-3 pb-3">
                 <Row>
                     <Col sm={10}>
-                        <Card.Title><span style={{ fontWeight: 'bolder' }}>#{item.number}</span> {item.title}
+                        <Card.Title> <span style={{ fontWeight: 'bolder' }}>#{item.number}</span> {item.title}
                             <Label labels={item.labels} />
                         </Card.Title>
                         <Card.Subtitle className="mb-2 text-muted"><span style={{ fontStyle: 'italic' }}>Opened {moment(item.created_at).startOf('day').fromNow()}</span> by <span style={{ fontWeight: 'bold', color: 'black' }}>@{item.user.login}</span></Card.Subtitle>
@@ -27,6 +27,7 @@ export default function RenderIssues(props) {
             </Card >
         )
     }
+
     return (
         <div>
         <div id="grad" class="jumbotron jumbotron-fluid">
@@ -39,11 +40,11 @@ export default function RenderIssues(props) {
         <div className="container">
             <Card className='p3 mb-3'>
                 <Card.Body style={{paddingLeft: 5 +'rem', paddingRight: 5+'rem'}}className='text-center'>
-                    <h5 style={{ fontWeight: 'bold' }}>👋Want to contribute to {props.repo.full_name}?</h5>
+                    <h5 style={{ fontWeight: 'bold' }}> 👋Want to contribute to {props.repo.full_name}?</h5>
                     <p>If you have a bug or an idea, read the contributing guidelines before opening an issue.<br></br>
                     If you're ready to tackle some open issues, we've collected some good first issues for you.</p></Card.Body>
             </Card>
-            <h5>View Issues From {props.repo.full_name}</h5>
+            <div onClick={()=> props.fetchComments(props.comments.id)}><h5>View Issues From {props.repo.full_name}</h5></div>
             <h6>{props.repo.description}</h6>
             {renderIssues()}
         </div>
