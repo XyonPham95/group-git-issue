@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Card, Col, Row, } from 'react-bootstrap/';
 import NavBar from './components/NavBar'
 import RenderSearchResults from './components/RenderSearchResults'
 import RenderRepo from './components/RenderRepo'
 import RenderIssues from './components/RenderIssues'
+import RenderSingleIssue from './components/RenderSingleIssue'
 import ReactModal from 'react-modal';
 import Pagination from "react-js-pagination";
+import RenderComments from './components/RenderComments'
 
 const clientId = process.env.REACT_APP_CLIENT_ID;
 
@@ -18,8 +19,10 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('')
   const [view, setView] = useState('landing')
   const [repo, setRepo] = useState(null)
-
-
+  const [singleIssue, setSingleIssue] = useState({})
+  const [issueNumber, setIssueNumber] = useState(0)
+  const [commentNumber, setCommentNumber] = useState(0)
+  const [comments, setComments] = useState({})
 
   useEffect(() => { //if we already have token in our local storage, then just use that one, if not then call the server
     const existingToken = localStorage.getItem('token');
@@ -36,9 +39,6 @@ function App() {
       setToken(accessToken)
     }
 
-    if (existingToken) {
-      setToken(existingToken)
-    }
   }, [])
 
   const fetchSearch = async (search) => {
@@ -69,6 +69,7 @@ const fetchRepo = async (fullname) => {
 }
 
 const fetchIssues = async (fullname) => {
+  fetchRepo(fullname);
   const res = await fetch(`https://api.github.com/repos/${fullname}/issues`, {
     method: "GET",
     headers: {
@@ -81,13 +82,43 @@ const fetchIssues = async (fullname) => {
   setView('issues')
 }
 
+const fetchSingleIssue = async (fullname, issueNumber) => {
+  setIssueNumber(issueNumber);
+  const res = await fetch(`https://api.github.com/repos/${fullname}/issues/${issueNumber}`, {
+    method: "GET",
+    headers: {
+      'Content-Type': 'application/vnd.github.mercy-preview+json',
+      'Accept': 'application/vnd.github.squirrel-girl-preview'
+    }
+  })
+  const data = await res.json();
+  console.log('single issue',data)
+  setSingleIssue(data);
+  setView('singleIssue');
+}
+
+const fetchComments = async (fullname, issueNumber) => {
+  setCommentNumber(commentNumber);
+const res = await fetch (`https://api.github.com/repos/${fullname}/issues/${issueNumber}/reactions`,{
+  method: "GET",
+  headers: { 
+    'Content-Type': 'application/vnd.github.mercy-preview+json',
+    'Accept':  'application/vnd.github.squirrel-girl-preview+json'
+}
+})
+  const data = await res.json();
+  console.log('comments',data);
+  setView('comments');
+}
+
 
 
 const viewController = () => {
   if (view === 'landing') return (<div>landing</div>)
-  else if (view === 'search') return (<div><RenderSearchResults reps={reps} fetchRepo={fetchRepo} /></div>)
+  else if (view === 'search') return (<div><RenderSearchResults reps={reps} fetchRepo={fetchRepo} fetchIssues={fetchIssues} /></div>)
   else if (view === 'repo') return (<RenderRepo setView={setView} repo={repo} fetchIssues={fetchIssues} />)
-  else if (view === 'issues') return (<RenderIssues issues={issues}/>)
+  else if (view === 'issues') return (<RenderIssues repo={repo} issues={issues} fetchSingleIssue={fetchSingleIssue}/>)
+  else if (view === 'comments') return (<RenderComments comments={comments}/>)
 }
 
 return (
