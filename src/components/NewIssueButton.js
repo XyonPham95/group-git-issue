@@ -9,12 +9,10 @@ export default function NewIssueButton(props) {
 
     const handleTitle = (event) => {
         setTitle(event.target.value);
-        event.preventDefault()
     }
 
     const handleContent = event => {
         setContent(event.target.value);
-        event.preventDefault()
     }
 
     return (
@@ -31,7 +29,7 @@ export default function NewIssueButton(props) {
                         <Form.Label>Write</Form.Label>
                         <Form.Control as="textarea" rows="10" onChange={handleContent} placeholder="Leave a comment" />
                     </Form.Group>
-                    <Button className="float-right" variant="success" type="submit" onClick={()=>props.newIssue(title,content)}>
+                    <Button className="float-right" variant="success" type="submit" onClick={(e)=>{e.preventDefault();props.newIssue(title,content)}}>
                         Submit new issue
                     </Button>
                 </Form>

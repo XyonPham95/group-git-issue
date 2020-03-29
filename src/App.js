@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Card, Col, Row, } from 'react-bootstrap/';
@@ -22,8 +21,11 @@ function App() {
   const [repo, setRepo] = useState(null)
   const [fullName, setFullName] = useState('')
   const [singleIssue, setSingleIssue] = useState({})
+  const [comments, setComments] = useState([])
   let [isModalOpen, setIsModalOpen] = useState(false)
   const [issueNumber, setIssueNumber] = useState(0)
+  const [page, setPage] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
   
 
   useEffect(() => { //if we already have token in our local storage, then just use that one, if not then call the server
@@ -35,10 +37,13 @@ function App() {
     }
 
     if (accessToken) {
-      console.log(`New accessToken: ${accessToken}`);
-
-      localStorage.setItem("token", accessToken);
-      setToken(accessToken)
+      if(accessToken.includes("&scope")){
+        let splitToken = accessToken.split("&")
+        console.log(`New accessToken: ${splitToken[0]}`);
+        localStorage.setItem("token",splitToken[0])
+        setToken(splitToken[0])
+      }
+      
     }
 
     if (existingToken) {
@@ -47,6 +52,7 @@ function App() {
   }, [])
 
   const fetchSearch = async (search) => {
+    
     const res = await fetch(`https://api.github.com/search/repositories?q=${search}`, {
       method: 'GET',
       headers: {
@@ -69,12 +75,13 @@ const fetchRepo = async (fullname) => {
 
   })
   const data = await res.json();
-  setRepo(data)
-  setView('repo')
+  setRepo(data);
+  setTotalCount(data.open_issues_count);
   console.log('repo fetched:',data)
 }
 
 const fetchIssues = async (fullname) => {
+  fetchRepo(fullname);
   const res = await fetch(`https://api.github.com/repos/${fullname}/issues`, {
     method: "GET",
     headers: {
@@ -101,12 +108,25 @@ const fetchSingleIssue = async (fullname, issueNumber) => {
   const data = await res.json();
   console.log('single issue',data)
   setSingleIssue(data);
+
+  if(data.comments>0){
+    const resComment = await fetch(`https://api.github.com/repos/${fullname}/issues/${issueNumber}/comments`, {
+      method: "GET",
+      headers: {
+      'Content-Type': 'application/vnd.github.mercy-preview+json',
+      'Accept': 'application/vnd.github.squirrel-girl-preview'
+      }
+  })
+  const dataComment = await resComment.json();
+  console.log('display comments',dataComment)
+  setComments(dataComment);
+  }
   setView('singleIssue');
 }
 
 const postNewIssue = async (fullname, title, content) => {
   const issue = { "title": title, "body": content };
-  console.log('app.js page:',fullname,title,content,token )
+  console.log('app.js page:',fullname,title,content,token)
   const url = `https://api.github.com/repos/${fullname}/issues`;
   const response = await fetch(url, {
   method: "POST",
@@ -116,13 +136,24 @@ const postNewIssue = async (fullname, title, content) => {
   },
   body: JSON.stringify(issue)
 });
+  console.log('response:',response);
 
-  console.log('response:',response)
-  fetchIssues(fullname);
+  //fetch Issues again
+  const res = await fetch(`https://api.github.com/repos/${fullname}/issues`, {
+    method: "GET",
+    headers: {
+      'Content-Type': 'application/vnd.github.mercy-preview+json'
+    }
+
+  })
+  const data = await res.json();
+  setIssues(data)
+  closeModal();
+  
 }
 
-const newComment = async (fullname, content) => {
-  const comment = { "body": content };
+const submitNewComment = async (fullname, content) => {
+  const newComment = { "body": content };
   console.log('app.js page:',fullname,content,token )
   const url = `https://api.github.com/repos/${fullname}/issues/${issueNumber}/comments`;
   const response = await fetch(url, {
@@ -131,12 +162,38 @@ const newComment = async (fullname, content) => {
     "Content-Type": "application/x-www-form-urlencoded",
     "Authorization": `token ${token}`
   },
-  body: JSON.stringify(comment)
+  body: JSON.stringify(newComment)
 });
-
   console.log('response:',response)
-  fetchSingleIssue(fullname,issueNumber);
-  setView('singleIssue');
+
+  const resComment = await fetch(`https://api.github.com/repos/${fullname}/issues/${issueNumber}/comments`, {
+    method: "GET",
+    headers: {
+    'Content-Type': 'application/vnd.github.mercy-preview+json',
+    'Accept': 'application/vnd.github.squirrel-girl-preview'
+    }
+  })
+  const dataComment = await resComment.json();
+  console.log('display comments',dataComment)
+  setComments(dataComment);
+  setTimeout(() => fetchSingleIssue(fullName, issueNumber), 3000);
+  closeModal();
+}
+
+
+const handlePageChange = async (page) => {
+  setPage(page)
+  const res = await fetch(`https://api.github.com/repos/${fullName}/issues?page=${page}`, {
+    method: "GET",
+    headers: {
+      'Content-Type': 'application/vnd.github.mercy-preview+json'
+    }
+
+  })
+  console.log(res)
+  const data = await res.json();
+  console.log(data)
+  setIssues(data)
 }
 
 
@@ -161,8 +218,10 @@ const viewController = () => {
   if (view === 'landing') return (<div>landing</div>)
   else if (view === 'search') return (<div><RenderSearchResults reps={reps} fetchRepo={fetchRepo} fetchIssues={fetchIssues} /></div>)
   else if (view === 'repo') return (<RenderRepo setView={setView} repo={repo} fetchIssues={fetchIssues} />)
-  else if (view === 'issues') return (<RenderIssues fullName={fullName} issues={issues} fetchSingleIssue={fetchSingleIssue} isModalOpen={isModalOpen} openIssue={openIssue}  closeModal={closeModal} postNewIssue={postNewIssue}/>)
-  else if (view === "singleIssue") return (<RenderSingleIssue fullName={fullName} singleIssue={singleIssue} openIssue={openIssue} isModalOpen={isModalOpen} closeModal={closeModal} postNewIssue={postNewIssue} newComment={newComment}/>)
+  else if (view === 'issues') return (<RenderIssues fullName={fullName} issues={issues} fetchSingleIssue={fetchSingleIssue} isModalOpen={isModalOpen} openIssue={openIssue}  closeModal={closeModal} postNewIssue={postNewIssue}
+    searchTerm={searchTerm} page={page} handlePageChange={handlePageChange} totalCount={totalCount} repo={repo} fetchIssues={fetchIssues}/>)
+  else if (view === "singleIssue") return (<RenderSingleIssue fullName={fullName} singleIssue={singleIssue} openIssue={openIssue} isModalOpen={isModalOpen} closeModal={closeModal} fetchIssues={fetchIssues}
+    postNewIssue={postNewIssue} submitNewComment={submitNewComment} issueNumber={issueNumber} token={token} setView={setView} comments={comments}/>)
 }
 
 return (

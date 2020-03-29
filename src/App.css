@@ -36,3 +36,11 @@
     transform: rotate(360deg);
   }
 }
+
+.b60205{
+  color: white !important;
+}
+
+#grad {
+  background-image: linear-gradient(#E2F6F7, white);
+}
