@@ -3,7 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Moment from 'react-moment';
 import Book from './book.JPG'
 import Star from './star.JPG'
-import Circle from './circle.JPG'
+
 
 import Pagination from "react-js-pagination";
 
@@ -15,7 +15,7 @@ export default function RenderSearchResults(props) {
             <div key={index} className="row border-bottom mt-3">
                 <div className="col-lg-12">
 
-                    <h4 onClick={() => props.fetchRepo(item.full_name)}><img src={Book} alt="book" />{item.full_name}</h4>
+                    <h4 onClick={() => props.fetchIssues(item.full_name)}><img src={Book} alt="book" />{item.full_name}</h4>
                     <div>{item.description}</div>
                     <div className="container">
                         <div className="row" style={{marginBottom: '2%'}}>
@@ -64,12 +64,12 @@ export default function RenderSearchResults(props) {
                     <div className='d-flex justify-content-center'>
                         <Pagination
                             activePage={props.page}
-                            itemsCountPerPage={30}
-                            totalItemsCount={props.totalCount}
+                            itemsCountPerPage={20}
+                            totalItemsCount={props.searchTotalCount}
                             pageRangeDisplayed={5}
                             itemClass="page-item"
                             linkClass="page-link"
-                            onChange={e => props.handlePageChange(e)}
+                            onChange={e => props.handleSearchPageChange(e)}
                         />
                     </div>
                 </div>
