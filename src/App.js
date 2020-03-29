@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Card, Col, Row, } from 'react-bootstrap/';
 import NavBar from './components/NavBar'
 import RenderSearchResults from './components/RenderSearchResults'
 import RenderRepo from './components/RenderRepo'
 import RenderIssues from './components/RenderIssues'
-import ReactModal from 'react-modal';
-import Pagination from "react-js-pagination";
+
 
 const clientId = process.env.REACT_APP_CLIENT_ID;
 
@@ -18,7 +15,9 @@ function App() {
   const [reps, setReps] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const [view, setView] = useState('landing')
-  const [repo, setRepo] = useState(null)
+  const [repo, setRepo] = useState([])
+  const [page, setPage] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
 
 
 
@@ -43,6 +42,7 @@ function App() {
   }, [])
 
   const fetchSearch = async (search) => {
+    
     const res = await fetch(`https://api.github.com/search/repositories?q=${search}`, {
       method: 'GET',
       headers: {
@@ -56,8 +56,8 @@ function App() {
   console.log(data)
 }
 
-const fetchRepo = async (fullname) => {
-  const res = await fetch(`https://api.github.com/repos/${fullname}`, {
+const fetchRepo = async () => {
+  const res = await fetch(`https://api.github.com/repos/${searchTerm}`, {
     method: "GET",
     headers: {
       'Content-Type': 'application/vnd.github.mercy-preview+json'
@@ -66,21 +66,44 @@ const fetchRepo = async (fullname) => {
   })
   const data = await res.json();
   setRepo(data)
-  setView('repo')
+  console.log(data)
+  setTotalCount(data.open_issues_count)
+
+  // setView('repo') no more repo view state, however there is still a fetchrepo function in use (see line 88)
 }
 
 const fetchIssues = async (fullname) => {
-  const res = await fetch(`https://api.github.com/repos/${fullname}/issues`, {
+  const res = await fetch(`https://api.github.com/repos/${fullname}/issues?page=1`, {
     method: "GET",
     headers: {
       'Content-Type': 'application/vnd.github.mercy-preview+json'
     }
 
   })
+  console.log('result',res)
   const data = await res.json();
+  console.log(data)
   setIssues(data)
   setView('issues')
+  fetchRepo();
+ 
 }
+
+const handlePageChange = async (page) => {
+  setPage(page)
+  const res = await fetch(`https://api.github.com/repos/${searchTerm}/issues?page=${page}`, {
+    method: "GET",
+    headers: {
+      'Content-Type': 'application/vnd.github.mercy-preview+json'
+    }
+
+  })
+  console.log(res)
+  const data = await res.json();
+  console.log(data)
+  setIssues(data)
+}
+
 
 if (!token) {
   return (
@@ -92,15 +115,14 @@ if (!token) {
 
 const viewController = () => {
   if (view === 'landing') return (<div>landing</div>)
-  else if (view === 'search') return (<div><RenderSearchResults reps={reps} fetchRepo={fetchRepo} /></div>)
-  else if (view === 'repo') return (<RenderRepo setView={setView} repo={repo} fetchIssues={fetchIssues} />)
-  else if (view === 'issues') return (<RenderIssues issues={issues} />)
+  else if (view === 'search') return (<div><RenderSearchResults reps={reps} fetchRepo={fetchRepo} fetchIssues={fetchIssues} issues={issues} /></div>)
+  // else if (view === 'repo') return (<div><RenderRepo setView={setView} repo={repo} fetchIssues={fetchIssues} issues={issues}/> </div>)
+  else if (view === 'issues') return (<RenderIssues issues={issues} repo={repo} searchTerm={searchTerm} page={page} handlePageChange={handlePageChange} totalCount={totalCount} repo={repo}/>)
 }
 
 return (
   <div>
     <NavBar fetchSearch={fetchSearch} setSearchTerm={setSearchTerm} searchTerm={searchTerm} />
-    {token}
     {viewController()}
   </div>
 )}
