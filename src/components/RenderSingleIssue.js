@@ -219,7 +219,10 @@ export default function RenderSingleIssue(props) {
             className="float-right"
             variant="success"
             type="submit"
-            onClick={() => props.submitNewComment(props.fullName, newComment)}
+            onClick={e => {
+              e.preventDefault();
+              props.submitNewComment(props.fullName, newComment);
+            }}
           >
             Comment
           </Button>
